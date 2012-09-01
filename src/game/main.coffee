@@ -48,7 +48,7 @@ ig.module(
       this.parent();
 
       # Add your own, additional update code here
-      if ig.input.state("place_generator")
+      if ig.input.released("place_generator")
         this.spawnEntity(EntityGenerator, ig.input.mouse.x, ig.input.mouse.y)
 
     draw: () ->
