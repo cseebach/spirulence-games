@@ -32,4 +32,4 @@ def game_levels(jsfile):
 def game_assets(asset):
     return bottle.static_file(asset, "media/")
 
-bottle.run(app, port=80)
+bottle.run(app, port=8081)
