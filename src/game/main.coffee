@@ -7,7 +7,7 @@ ig.module(
 )
 .defines(() ->
 
-  EntityGenerator = ig.Entity.extend(
+  Generator = ig.Entity.extend(
 
     size: {x:16, y:16}
 
@@ -19,6 +19,18 @@ ig.module(
     init: (x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim('idle', 0.1, [0,1])
+  )
+
+  Mine = ig.Entity.extend(
+    size: {x:16, y:16}
+
+    collides: ig.Entity.COLLIDES.PASSIVE
+
+    animSheet: new ig.AnimationSheet("media/mine.png", 16 ,16)
+
+    init: (x, y, settings) ->
+      this.parent(x, y, settings)
+      this.addAnim('idle', 0.2, [0,1,2,3,4,4,4,4,4,4,4,3,2,1,0,0,0,0,0])
   )
 
   BackGround = ig.Entity.extend(
@@ -41,9 +53,10 @@ ig.module(
 
     init: () ->
       # Initialize your game here; bind keys etc.
-      ig.input.bind(ig.KEY.MOUSE1, 'place_generator')
+      ig.input.bind(ig.KEY.MOUSE1, 'place_building')
       this.spawnEntity(BackGround, 0, 0)
-      this.placeEntity = this.spawnEntity(EntityGenerator, -100, -100)
+      this.placeClass = Mine
+      this.placeEntity = this.spawnEntity(this.placeClass, -100, -100)
       this.placeEntity.currentAnim.alpha = 0.5
 
     update: () ->
@@ -54,8 +67,8 @@ ig.module(
       placeY = Math.floor(ig.input.mouse.y/16)*16
 
       # Add your own, additional update code here
-      if ig.input.released("place_generator")
-        this.spawnEntity(EntityGenerator, placeX, placeY)
+      if ig.input.released("place_building")
+        this.spawnEntity(this.placeClass, placeX, placeY)
       else
         this.placeEntity.pos.x = placeX
         this.placeEntity.pos.y = placeY
@@ -65,6 +78,7 @@ ig.module(
       this.parent();
 
       # Add your own drawing code here
+      # have to draw the UI here
   )
 
   # Start the Game with 60fps, a resolution of 320x240, scaled
