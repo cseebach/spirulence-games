@@ -14,6 +14,7 @@ ig.module(
     collides: ig.Entity.COLLIDES.PASSIVE
 
     animSheet: new ig.AnimationSheet('media/generator.png', 16, 16)
+    #placeSheet: new ig.AnimationSheet('media/generator.png', 16, 16)
 
     init: (x, y, settings) ->
       this.parent(x, y, settings)
@@ -42,18 +43,23 @@ ig.module(
       # Initialize your game here; bind keys etc.
       ig.input.bind(ig.KEY.MOUSE1, 'place_generator')
       this.spawnEntity(BackGround, 0, 0)
+      this.placeEntity = this.spawnEntity(EntityGenerator, -100, -100)
 
     update: () ->
       # Update all entities and backgroundMaps
       this.parent();
 
+      placeX = Math.floor(ig.input.mouse.x/16)*16
+      placeY = Math.floor(ig.input.mouse.y/16)*16
+
       # Add your own, additional update code here
       if ig.input.released("place_generator")
-        this.spawnEntity(EntityGenerator, ig.input.mouse.x, ig.input.mouse.y)
+        this.spawnEntity(EntityGenerator, placeX, placeY)
+      else
+        this.placeEntity.pos.x = placeX
+        this.placeEntity.pos.y = placeY
 
     draw: () ->
-      this.bg.draw(0,0)
-
       # Draw all entities and backgroundMaps
       this.parent();
 
