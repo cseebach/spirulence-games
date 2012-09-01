@@ -44,6 +44,7 @@ ig.module(
       ig.input.bind(ig.KEY.MOUSE1, 'place_generator')
       this.spawnEntity(BackGround, 0, 0)
       this.placeEntity = this.spawnEntity(EntityGenerator, -100, -100)
+      this.placeEntity.currentAnim.alpha = 0.5
 
     update: () ->
       # Update all entities and backgroundMaps
