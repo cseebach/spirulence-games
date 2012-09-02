@@ -142,6 +142,39 @@ ig.module(
       this.addAnim('idle', 0.1, [0])
   )
 
+  BuildingButton = ig.Class.extend(
+
+    buttonBack: new ig.Image("media/button.png")
+
+    init: (x, y, buildingClass, imagePath, enabled) ->
+      this.x = x
+      this.y = y
+      this.size = 16
+      this.buildingClass = buildingClass
+      this.image = new ig.Image(imagePath)
+      this.enabled = if enabled? then enabled else true
+
+    update: ()->
+
+    draw: ()->
+      this.buttonBack.drawTile(this.x, this.y, 0, this.size)
+      this.image.drawTile(this.x, this.y, 0, this.size)
+      if not this.enabled
+        this.buttonBack.drawTile(this.x, this.y, 0, this.size)
+
+  )
+
+  Queue = ig.Class.extend(
+
+    init: (x, y) ->
+      this.x = x
+      this.y = y
+      this.tileSize = 16
+      this.queue = []
+
+
+  )
+
   MyGame = ig.Game.extend(
 
     # Load a font
@@ -153,7 +186,8 @@ ig.module(
 
     init: () ->
       # Initialize your game here; bind keys etc.
-      ig.input.bind(ig.KEY.MOUSE1, 'place_building')
+      ig.input.bind(ig.KEY.MOUSE1, 'primary_button')
+      ig.input.bind(ig.KEY.MOUSE2, 'secondary_button')
       ig.input.bind(ig.KEY.F, 'factory_placement')
       ig.input.bind(ig.KEY.M, 'mine_placement')
       ig.input.bind(ig.KEY.G, 'generator_placement')
@@ -165,6 +199,17 @@ ig.module(
 
       this.spawnEntity(BackGround, 0, 0)
       this.updatePlaceEntity(Factory)
+
+      this.buildButtons = [
+        new BuildingButton(61, 224, Mine, "media/mine.png")
+        new BuildingButton(77, 224, Generator, "media/generator.png")
+        new BuildingButton(93, 224, Factory, "media/factory.png")
+        new BuildingButton(113, 224, ResearchCenter, "media/research_center.png")
+        new BuildingButton(129, 224, Borehole, "media/borehole.png", false)
+        new BuildingButton(145, 224, Supercollider, "media/supercollider.png", false)
+        new BuildingButton(161, 224, QuantomOptoComptroller, "media/qo_comptroller.png", false)
+        new BuildingButton(177, 224, DomeGenerator, "media/dome_generator.png", false)
+      ]
 
       this.totalEnergy = 20
       this.usedEnergy = 10
@@ -182,6 +227,8 @@ ig.module(
       # Update all entities and backgroundMaps
       this.parent();
 
+      button.update() for button in this.buildButtons
+
       this.minerals += this.mineralsPerSecond/60.0
 
       placeX = Math.floor(ig.input.mouse.x/16)*16
@@ -195,30 +242,6 @@ ig.module(
         this.placeEntity.pos.x = placeX
         this.placeEntity.pos.y = placeY
 
-      if ig.input.released("factory_placement")
-        this.updatePlaceEntity(Factory)
-
-      if ig.input.released("mine_placement")
-        this.updatePlaceEntity(Mine)
-
-      if ig.input.released("generator_placement")
-        this.updatePlaceEntity(Generator)
-
-      if ig.input.released("borehole_placement")
-        this.updatePlaceEntity(Borehole)
-
-      if ig.input.released("research_placement")
-        this.updatePlaceEntity(ResearchCenter)
-
-      if ig.input.released("supercollider_placement")
-        this.updatePlaceEntity(Supercollider)
-
-      if ig.input.released("qoc_placement")
-        this.updatePlaceEntity(QuantomOptoComptroller)
-
-      if ig.input.released("dome_placement")
-        this.updatePlaceEntity(DomeGenerator)
-
     draw: () ->
       # Draw all entities and backgroundMaps
       this.parent();
@@ -226,6 +249,13 @@ ig.module(
       # Add your own drawing code here
       # have to draw the UI here
       this.lowerPanelBg.draw(0, 209)
+
+      this.font.draw("Build:", 61, 215)
+
+      button.draw() for button in this.buildButtons
+
+
+
 
       this.leftPanelBg.draw(0, 181)
 
