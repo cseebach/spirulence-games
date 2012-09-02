@@ -310,7 +310,7 @@ ig.module(
         new BuildingButton(177, 224, DomeGenerator, "media/dome_generator.png", 5000, false)
       ]
 
-      this.alerts = ["Here's a sample alert!"]
+      this.alerts = [{text:"Here's a sample alert!", time:120}]
 
       this.buildButtons[0].productionFinished()
       this.buildButtons[0].productionFinished()
@@ -362,6 +362,11 @@ ig.module(
           this.placeEntity.pos.x = placeX
           this.placeEntity.pos.y = placeY
 
+        if this.alerts.length > 0
+          this.alerts[0].time -= 1
+          if this.alerts[0].time <= 0
+            this.alerts.shift()
+
       if ig.input.released("pause")
         this.paused = not this.paused
 
@@ -381,7 +386,7 @@ ig.module(
       #alert pane
       this.lowerPanelBg.draw(-32, 193)
       if this.alerts.length > 0
-        this.font.draw(this.alerts[0], 61, 195)
+        this.font.draw(this.alerts[0].text, 61, 195)
 
       # research info pane
       this.lowerPanelBg.draw(-16, 201)
