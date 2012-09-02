@@ -7,7 +7,52 @@ ig.module(
 )
 .defines(() ->
 
-  ResearchCenter =ig.Entity.extend(
+  DomeGenerator = ig.Entity.extend(
+    size: {x:16, y:16}
+
+    collides: ig.Entity.COLLIDES.PASSIVE
+
+    animSheet: new ig.AnimationSheet("media/dome_generator.png", 16, 16)
+
+    init:(x, y, settings) ->
+      this.parent(x, y, settings)
+      this.addAnim("idle", 0.05, [0,1,2,3,4,5,6,7])
+
+    place: () ->
+
+  )
+
+  QuantomOptoComptroller = ig.Entity.extend(
+    size: {x:16, y:16}
+
+    collides: ig.Entity.COLLIDES.PASSIVE
+
+    animSheet: new ig.AnimationSheet("media/qo_comptroller.png", 16, 16)
+
+    init:(x, y, settings) ->
+      this.parent(x, y, settings)
+      this.addAnim("idle", 0.2, [0,1,2,3,])
+
+    place: () ->
+
+  )
+
+  Supercollider = ig.Entity.extend(
+    size: {x:16, y:16}
+
+    collides: ig.Entity.COLLIDES.PASSIVE
+
+    animSheet: new ig.AnimationSheet("media/supercollider.png", 16, 16)
+
+    init:(x, y, settings) ->
+      this.parent(x, y, settings)
+      this.addAnim("idle", 0.1, [0,0,0,0,0,0,0,0,0,1,2,3,4,5,6,7,8,9])
+
+    place: () ->
+
+  )
+
+  ResearchCenter = ig.Entity.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
@@ -16,7 +61,7 @@ ig.module(
 
     init:(x, y, settings) ->
       this.parent(x, y, settings)
-      this.addAnim("idle", 0.1, [0,0,0,1,2,3,4,4,3,2,1,0,0,0])
+      this.addAnim("idle", 0.1, [0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,4,3,2,1,0,0,0])
 
     place: () ->
 
@@ -114,6 +159,9 @@ ig.module(
       ig.input.bind(ig.KEY.G, 'generator_placement')
       ig.input.bind(ig.KEY.B, 'borehole_placement')
       ig.input.bind(ig.KEY.R, 'research_placement')
+      ig.input.bind(ig.KEY.S, 'supercollider_placement')
+      ig.input.bind(ig.KEY.Q, 'qoc_placement')
+      ig.input.bind(ig.KEY.D, 'dome_placement')
 
       this.spawnEntity(BackGround, 0, 0)
       this.updatePlaceEntity(Factory)
@@ -161,6 +209,15 @@ ig.module(
 
       if ig.input.released("research_placement")
         this.updatePlaceEntity(ResearchCenter)
+
+      if ig.input.released("supercollider_placement")
+        this.updatePlaceEntity(Supercollider)
+
+      if ig.input.released("qoc_placement")
+        this.updatePlaceEntity(QuantomOptoComptroller)
+
+      if ig.input.released("dome_placement")
+        this.updatePlaceEntity(DomeGenerator)
 
     draw: () ->
       # Draw all entities and backgroundMaps
