@@ -12,6 +12,10 @@ app.install(db_plugin)
 def game():
     return dict()
 
+@app.route("/lib/<othercode>")
+def other_code(othercode):
+    return bottle.static_file(othercode, "lib/")
+
 @app.route("/lib/impact/<jsfile>")
 def impact_code(jsfile):
     return bottle.static_file(jsfile, "lib/impact/")

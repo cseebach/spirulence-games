@@ -19,6 +19,9 @@ ig.module(
     init: (x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim('idle', 0.1, [0,1])
+
+    place: () ->
+      ig.game.totalEnergy += 10
   )
 
   Mine = ig.Entity.extend(
@@ -31,6 +34,11 @@ ig.module(
     init: (x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim('idle', 0.2, [0,1,2,3,4,4,4,4,4,4,4,3,2,1,0,0,0,0,0])
+
+    place: () ->
+      ig.game.mineralsPerSecond += 3
+
+
   )
 
   Factory = ig.Entity.extend(
@@ -43,6 +51,9 @@ ig.module(
     init: (x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim('idle', 0.4, [0,1])
+
+    place: () ->
+      ig.game.mineralsPerSecond -= 3
   )
 
   BackGround = ig.Entity.extend(
@@ -59,9 +70,10 @@ ig.module(
   MyGame = ig.Game.extend(
 
     # Load a font
-    #font: new ig.Font( 'media/04b03.font.png' )
+    font: new ig.Font( 'media/04b03.font.png' )
 
-    bg: new ig.Image('media/background.png')
+    # HUD graphics
+    leftPanelBg: new ig.Image("media/left_panel.png")
 
     init: () ->
       # Initialize your game here; bind keys etc.
@@ -71,13 +83,15 @@ ig.module(
       ig.input.bind(ig.KEY.G, 'generator_placement')
 
       this.spawnEntity(BackGround, 0, 0)
-      this.placeClass = Factory
-      this.updatePlaceEntity()
+      this.updatePlaceEntity(Factory)
 
       this.totalEnergy = 20
       this.usedEnergy = 10
+      this.minerals = 100
+      this.mineralsPerSecond = 0
 
-    updatePlaceEntity: () ->
+    updatePlaceEntity: (placeClass) ->
+      this.placeClass = placeClass
       if this.placeEntity
         this.placeEntity.kill()
       this.placeEntity = this.spawnEntity(this.placeClass, -100, -100)
@@ -87,28 +101,27 @@ ig.module(
       # Update all entities and backgroundMaps
       this.parent();
 
+      this.minerals += this.mineralsPerSecond/60.0
+
       placeX = Math.floor(ig.input.mouse.x/16)*16
       placeY = Math.floor(ig.input.mouse.y/16)*16
 
       # Add your own, additional update code here
       if ig.input.released("place_building")
-        this.spawnEntity(this.placeClass, placeX, placeY)
+        justPlaced = this.spawnEntity(this.placeClass, placeX, placeY)
+        justPlaced.place()
       else
         this.placeEntity.pos.x = placeX
         this.placeEntity.pos.y = placeY
 
       if ig.input.released("factory_placement")
-        this.placeClass = Factory
-        this.updatePlaceEntity()
+        this.updatePlaceEntity(Factory)
 
       if ig.input.released("mine_placement")
-        this.placeClass = Mine
-        this.updatePlaceEntity()
+        this.updatePlaceEntity(Mine)
 
       if ig.input.released("generator_placement")
-        this.placeClass = Generator
-        this.updatePlaceEntity()
-
+        this.updatePlaceEntity(Generator)
 
     draw: () ->
       # Draw all entities and backgroundMaps
@@ -116,6 +129,13 @@ ig.module(
 
       # Add your own drawing code here
       # have to draw the UI here
+      this.leftPanelBg.draw(0, 181)
+
+      this.font.draw("Minerals:", 1, 185)
+      this.font.draw(sprintf("%.0d (%+.0d)", this.minerals, this.mineralsPerSecond), 1, 193)
+
+      this.font.draw("Energy Used:", 1, 205)
+      this.font.draw(sprintf("%.0d/%.0d", this.usedEnergy, this.totalEnergy), 1, 213)
   )
 
   # Start the Game with 60fps, a resolution of 320x240, scaled
