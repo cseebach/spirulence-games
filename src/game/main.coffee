@@ -286,19 +286,15 @@ ig.module(
     # HUD graphics
     leftPanelBg: new ig.Image("media/left_panel.png")
     lowerPanelBg: new ig.Image("media/lower_panel.png")
+    pauseBlackout: new ig.Image("media/pause_blackout.png")
 
     init: () ->
       # Initialize your game here; bind keys etc.
       ig.input.bind(ig.KEY.MOUSE1, 'primary_button')
       ig.input.bind(ig.KEY.MOUSE2, 'secondary_button')
-      ig.input.bind(ig.KEY.F, 'factory_placement')
-      ig.input.bind(ig.KEY.M, 'mine_placement')
-      ig.input.bind(ig.KEY.G, 'generator_placement')
-      ig.input.bind(ig.KEY.B, 'borehole_placement')
-      ig.input.bind(ig.KEY.R, 'research_placement')
-      ig.input.bind(ig.KEY.S, 'supercollider_placement')
-      ig.input.bind(ig.KEY.Q, 'qoc_placement')
-      ig.input.bind(ig.KEY.D, 'dome_placement')
+      ig.input.bind(ig.KEY.SPACE, "pause")
+
+      this.paused = false
 
       this.spawnEntity(BackGround, 0, 0)
       this.updatePlaceEntity(false)
@@ -343,27 +339,31 @@ ig.module(
         this.placeEntity.currentAnim.alpha = 0.5
 
     update: () ->
-      # Update all entities and backgroundMaps
-      this.parent();
+      if not this.paused
+        # Update all entities and backgroundMaps
+        this.parent();
 
-      button.update() for button in this.buildButtons
+        button.update() for button in this.buildButtons
 
-      this.buildQueue.update()
+        this.buildQueue.update()
 
-      this.minerals += this.mineralsPerSecond/60.0
+        this.minerals += this.mineralsPerSecond/60.0
 
-      placeX = Math.floor(ig.input.mouse.x/16)*16
-      placeY = Math.floor(ig.input.mouse.y/16)*16
+        placeX = Math.floor(ig.input.mouse.x/16)*16
+        placeY = Math.floor(ig.input.mouse.y/16)*16
 
-      # Add your own, additional update code here
-      if ig.input.released("primary_button") and this.legalPlacement(placeX, placeY)
-          if this.placeClass and this.placeEntity.canPlace()
-            justPlaced = this.spawnEntity(this.placeClass, placeX, placeY)
-            justPlaced.place()
-            this.buttonToUpdate.buildingBuilt()
-      else if this.placeEntity
-        this.placeEntity.pos.x = placeX
-        this.placeEntity.pos.y = placeY
+        # Add your own, additional update code here
+        if ig.input.released("primary_button") and this.legalPlacement(placeX, placeY)
+            if this.placeClass and this.placeEntity.canPlace()
+              justPlaced = this.spawnEntity(this.placeClass, placeX, placeY)
+              justPlaced.place()
+              this.buttonToUpdate.buildingBuilt()
+        else if this.placeEntity
+          this.placeEntity.pos.x = placeX
+          this.placeEntity.pos.y = placeY
+
+      if ig.input.released("pause")
+        this.paused = not this.paused
 
     legalPlacement: (x, y)->
       if x < 64
@@ -418,6 +418,9 @@ ig.module(
 
       this.font.draw("Production:", 1, 225)
       this.font.draw(sprintf("%+.0d", this.production), 1, 233)
+
+      if this.paused
+        this.pauseBlackout.draw(0,0)
   )
 
   # Start the Game with 60fps, a resolution of 320x240, scaled
