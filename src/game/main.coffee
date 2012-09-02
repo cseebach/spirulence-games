@@ -195,6 +195,8 @@ ig.module(
 
     buildingBuilt: () ->
       this.numberBuilt -= 1
+      if this.numberBuilt <= 0
+        ig.game.updatePlaceEntity(false, this)
 
     draw: ()->
       if this.hovered
@@ -319,13 +321,21 @@ ig.module(
       placeY = Math.floor(ig.input.mouse.y/16)*16
 
       # Add your own, additional update code here
-      if ig.input.released("primary_button") #and this.legalPlacement(placeX, placeY)
-        justPlaced = this.spawnEntity(this.placeClass, placeX, placeY)
-        justPlaced.place()
-        this.buttonToUpdate.buildingBuilt()
+      if ig.input.released("primary_button")
+        if this.legalPlacement(placeX, placeY)
+          if this.placeClass
+            justPlaced = this.spawnEntity(this.placeClass, placeX, placeY)
+            justPlaced.place()
+            this.buttonToUpdate.buildingBuilt()
       else if this.placeEntity
         this.placeEntity.pos.x = placeX
         this.placeEntity.pos.y = placeY
+
+    legalPlacement: (x, y)->
+      if x < 64
+        return y < 176
+      else
+        return y < 208
 
     draw: () ->
       # Draw all entities and backgroundMaps
