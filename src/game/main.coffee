@@ -24,6 +24,7 @@ ig.module(
         return false
       if this.energyCost >  ig.game.energyProduced - ig.game.energyConsumed
         return false
+      return true
 
     place:()->
       ig.game.mineralsConsumed += this.mineralsCost
@@ -37,10 +38,11 @@ ig.module(
 
     animSheet: new ig.AnimationSheet("media/dome_generator.png", 16, 16)
 
+    energyCost: 800
+
     init:(x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim("idle", 0.05, [0,1,2,3,4,5,6,7])
-
   )
 
   QuantomOptoComptroller = Placeable.extend(
@@ -50,11 +52,13 @@ ig.module(
 
     animSheet: new ig.AnimationSheet("media/qo_comptroller.png", 16, 16)
 
+    energyCost: 20
+
     init:(x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim("idle", 0.2, [0,1,2,3,])
 
-    place: () ->
+    #place: () ->
 
   )
 
@@ -65,11 +69,13 @@ ig.module(
 
     animSheet: new ig.AnimationSheet("media/supercollider.png", 16, 16)
 
+    energyCost: 50
+
     init:(x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim("idle", 0.1, [0,0,0,0,0,0,0,0,0,1,2,3,4,5,6,7,8,9])
 
-    place: () ->
+    #place: () ->
 
   )
 
@@ -80,11 +86,13 @@ ig.module(
 
     animSheet: new ig.AnimationSheet("media/research_center.png", 16, 16)
 
+    energyCost: 10
+
     init:(x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim("idle", 0.1, [0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,4,3,2,1,0,0,0])
 
-    place: () ->
+    #place: () ->
 
   )
 
@@ -95,12 +103,15 @@ ig.module(
 
     animSheet: new ig.AnimationSheet("media/borehole.png", 16, 16)
 
+    energyCost: 10
+
     init:(x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim("idle", 0.2, [0,0,0,1,2,3,4,4,3,2,1,0,0,0])
 
-
     place: () ->
+      this.parent()
+      ig.game.mineralsProduced += 30
   )
 
   Generator = Placeable.extend(
@@ -118,7 +129,7 @@ ig.module(
 
     place: () ->
       this.parent()
-      ig.game.energyProduced += 3
+      ig.game.energyProduced += 4
   )
 
   Mine = Placeable.extend(
@@ -127,6 +138,8 @@ ig.module(
     collides: ig.Entity.COLLIDES.PASSIVE
 
     animSheet: new ig.AnimationSheet("media/mine.png", 16 ,16)
+
+    energyCost: 1
 
     init: (x, y, settings) ->
       this.parent(x, y, settings)
@@ -143,6 +156,9 @@ ig.module(
     collides: ig.Entity.COLLIDES.PASSIVE
 
     animSheet: new ig.AnimationSheet("media/factory.png", 16 ,16)
+
+    energyCost: 6
+    mineralsCost: 6
 
     init: (x, y, settings) ->
       this.parent(x, y, settings)
@@ -238,11 +254,11 @@ ig.module(
 
     drawQueueItem: (button, i) ->
       this.queueBack.drawTile(this.x + i*16, this.y, 0, this.tileSize)
-      if i == 0
-        this.queueBack.draw(this.x, this.y,
-          32, 0,
-          this.getPercentDone(), 16)
       button.image.drawTile(this.x + i*16, this.y, 0, this.tileSize)
+      if i == 0
+        this.queueBack.draw(this.x, this.y-6,
+          32, 0,
+          this.getPercentDone(), 6)
 
     draw: () ->
        this.drawQueueItem(button, i) for button, i in this.queue
@@ -321,9 +337,8 @@ ig.module(
       placeY = Math.floor(ig.input.mouse.y/16)*16
 
       # Add your own, additional update code here
-      if ig.input.released("primary_button")
-        if this.legalPlacement(placeX, placeY)
-          if this.placeClass
+      if ig.input.released("primary_button") and this.legalPlacement(placeX, placeY)
+          if this.placeClass and this.placeEntity.canPlace()
             justPlaced = this.spawnEntity(this.placeClass, placeX, placeY)
             justPlaced.place()
             this.buttonToUpdate.buildingBuilt()
