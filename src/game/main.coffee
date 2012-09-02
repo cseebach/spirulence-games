@@ -7,7 +7,30 @@ ig.module(
 )
 .defines(() ->
 
-  DomeGenerator = ig.Entity.extend(
+  Placeable = ig.Entity.extend(
+    size: {x:16, y:16}
+
+    collides: ig.Entity.COLLIDES.PASSIVE
+
+    mineralsCost: 0
+
+    energyCost: 0
+
+    init:(x, y, settings) ->
+      this.parent(x, y, settings)
+
+    canPlace:()->
+      if this.mineralsCost >  ig.game.mineralsProduced - ig.game.mineralsConsumed
+        return false
+      if this.energyCost >  ig.game.energyProduced - ig.game.energyConsumed
+        return false
+
+    place:()->
+      ig.game.mineralsConsumed += this.mineralsCost
+      ig.game.energyConsumed += this.energyCost
+  )
+
+  DomeGenerator = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
@@ -18,11 +41,9 @@ ig.module(
       this.parent(x, y, settings)
       this.addAnim("idle", 0.05, [0,1,2,3,4,5,6,7])
 
-    place: () ->
-
   )
 
-  QuantomOptoComptroller = ig.Entity.extend(
+  QuantomOptoComptroller = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
@@ -37,7 +58,7 @@ ig.module(
 
   )
 
-  Supercollider = ig.Entity.extend(
+  Supercollider = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
@@ -52,7 +73,7 @@ ig.module(
 
   )
 
-  ResearchCenter = ig.Entity.extend(
+  ResearchCenter = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
@@ -67,7 +88,7 @@ ig.module(
 
   )
 
-  Borehole = ig.Entity.extend(
+  Borehole = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
@@ -82,7 +103,7 @@ ig.module(
     place: () ->
   )
 
-  Generator = ig.Entity.extend(
+  Generator = Placeable.extend(
 
     size: {x:16, y:16}
 
@@ -96,10 +117,11 @@ ig.module(
       this.addAnim('idle', 0.1, [0,1])
 
     place: () ->
-      ig.game.totalEnergy += 10
+      this.parent()
+      ig.game.energyProduced += 3
   )
 
-  Mine = ig.Entity.extend(
+  Mine = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
@@ -111,12 +133,11 @@ ig.module(
       this.addAnim('idle', 0.2, [0,1,2,3,4,4,4,4,4,4,4,3,2,1,0,0,0,0,0])
 
     place: () ->
-      ig.game.mineralsPerSecond += 3
-
-
+      this.parent()
+      ig.game.mineralsProduced += 3
   )
 
-  Factory = ig.Entity.extend(
+  Factory = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
@@ -128,7 +149,8 @@ ig.module(
       this.addAnim('idle', 0.4, [0,1])
 
     place: () ->
-      ig.game.mineralsPerSecond -= 3
+      this.parent()
+      ig.game.production += 3
   )
 
   BackGround = ig.Entity.extend(
@@ -146,33 +168,82 @@ ig.module(
 
     buttonBack: new ig.Image("media/button.png")
 
-    init: (x, y, buildingClass, imagePath, enabled) ->
+    init: (x, y, buildingClass, imagePath, buildCost, enabled) ->
       this.x = x
       this.y = y
       this.size = 16
       this.buildingClass = buildingClass
       this.image = new ig.Image(imagePath)
       this.enabled = if enabled? then enabled else true
+      this.hovered = false
+      this.buildCost = buildCost
+      this.numberBuilt = 0
 
     update: ()->
+      if this.x < ig.input.mouse.x < this.x + this.size and this.y < ig.input.mouse.y < this.y + this.size and this.enabled
+        this.hovered = true
+        if ig.input.released("secondary_button")
+          ig.game.buildQueue.add(this)
+        if ig.input.released("primary_button")
+          if this.numberBuilt > 0
+            ig.game.updatePlaceEntity(this.buildingClass, this)
+      else
+        this.hovered = false
+
+    productionFinished: () ->
+      this.numberBuilt += 1
+
+    buildingBuilt: () ->
+      this.numberBuilt -= 1
 
     draw: ()->
-      this.buttonBack.drawTile(this.x, this.y, 0, this.size)
+      if this.hovered
+        this.buttonBack.drawTile(this.x, this.y, 1, this.size)
+      else
+        this.buttonBack.drawTile(this.x, this.y, 0, this.size)
       this.image.drawTile(this.x, this.y, 0, this.size)
       if not this.enabled
-        this.buttonBack.drawTile(this.x, this.y, 0, this.size)
+        this.buttonBack.drawTile(this.x, this.y, 1, this.size)
+
+      ig.game.font.draw(this.numberBuilt.toString(), this.x, this.y-6)
 
   )
 
-  Queue = ig.Class.extend(
+  BuildQueue = ig.Class.extend(
+
+    queueBack: new ig.Image("media/queue_button.png")
 
     init: (x, y) ->
       this.x = x
       this.y = y
       this.tileSize = 16
       this.queue = []
+      this.costCompleted = 0
 
+    add: (buildButton) ->
+      this.queue.push(buildButton)
 
+    update:() ->
+      if this.queue.length > 0
+        this.costCompleted += ig.game.production / 60.0
+        if this.costCompleted >= this.queue[0].buildCost
+          this.queue[0].productionFinished()
+          this.queue.shift()
+          this.costCompleted = 0
+
+    getPercentDone:()->
+      return if this.costCompleted > 0.0 then this.costCompleted*16.0/this.queue[0].buildCost else 0.1
+
+    drawQueueItem: (button, i) ->
+      this.queueBack.drawTile(this.x + i*16, this.y, 0, this.tileSize)
+      if i == 0
+        this.queueBack.draw(this.x, this.y,
+          32, 0,
+          this.getPercentDone(), 16)
+      button.image.drawTile(this.x + i*16, this.y, 0, this.tileSize)
+
+    draw: () ->
+       this.drawQueueItem(button, i) for button, i in this.queue
   )
 
   MyGame = ig.Game.extend(
@@ -198,30 +269,41 @@ ig.module(
       ig.input.bind(ig.KEY.D, 'dome_placement')
 
       this.spawnEntity(BackGround, 0, 0)
-      this.updatePlaceEntity(Factory)
+      this.updatePlaceEntity(false)
 
       this.buildButtons = [
-        new BuildingButton(61, 224, Mine, "media/mine.png")
-        new BuildingButton(77, 224, Generator, "media/generator.png")
-        new BuildingButton(93, 224, Factory, "media/factory.png")
-        new BuildingButton(113, 224, ResearchCenter, "media/research_center.png")
-        new BuildingButton(129, 224, Borehole, "media/borehole.png", false)
-        new BuildingButton(145, 224, Supercollider, "media/supercollider.png", false)
-        new BuildingButton(161, 224, QuantomOptoComptroller, "media/qo_comptroller.png", false)
-        new BuildingButton(177, 224, DomeGenerator, "media/dome_generator.png", false)
+        new BuildingButton(61, 224, Mine, "media/mine.png", 40)
+        new BuildingButton(77, 224, Generator, "media/generator.png", 40)
+        new BuildingButton(93, 224, Factory, "media/factory.png", 100)
+        new BuildingButton(113, 224, ResearchCenter, "media/research_center.png", 200)
+        new BuildingButton(129, 224, Borehole, "media/borehole.png", 1000, false)
+        new BuildingButton(145, 224, Supercollider, "media/supercollider.png", 2000, false)
+        new BuildingButton(161, 224, QuantomOptoComptroller, "media/qo_comptroller.png", 2000, false)
+        new BuildingButton(177, 224, DomeGenerator, "media/dome_generator.png", 5000, false)
       ]
 
-      this.totalEnergy = 20
-      this.usedEnergy = 10
-      this.minerals = 100
-      this.mineralsPerSecond = 0
+      this.buildButtons[0].productionFinished()
+      this.buildButtons[0].productionFinished()
+      this.buildButtons[1].productionFinished()
+      this.buildButtons[1].productionFinished()
+      this.buildButtons[2].productionFinished()
 
-    updatePlaceEntity: (placeClass) ->
+      this.buildQueue = new BuildQueue(200, 224)
+
+      this.energyProduced = 0
+      this.energyConsumed = 0
+      this.mineralsProduced = 0
+      this.mineralsConsumed = 0
+      this.production = 0
+
+    updatePlaceEntity: (placeClass, buttonToUpdate) ->
+      this.buttonToUpdate = buttonToUpdate
       this.placeClass = placeClass
       if this.placeEntity
         this.placeEntity.kill()
-      this.placeEntity = this.spawnEntity(this.placeClass, -100, -100)
-      this.placeEntity.currentAnim.alpha = 0.5
+      if placeClass
+        this.placeEntity = this.spawnEntity(this.placeClass, -100, -100)
+        this.placeEntity.currentAnim.alpha = 0.5
 
     update: () ->
       # Update all entities and backgroundMaps
@@ -229,16 +311,19 @@ ig.module(
 
       button.update() for button in this.buildButtons
 
+      this.buildQueue.update()
+
       this.minerals += this.mineralsPerSecond/60.0
 
       placeX = Math.floor(ig.input.mouse.x/16)*16
       placeY = Math.floor(ig.input.mouse.y/16)*16
 
       # Add your own, additional update code here
-      if ig.input.released("place_building")
+      if ig.input.released("primary_button") #and this.legalPlacement(placeX, placeY)
         justPlaced = this.spawnEntity(this.placeClass, placeX, placeY)
         justPlaced.place()
-      else
+        this.buttonToUpdate.buildingBuilt()
+      else if this.placeEntity
         this.placeEntity.pos.x = placeX
         this.placeEntity.pos.y = placeY
 
@@ -250,20 +335,32 @@ ig.module(
       # have to draw the UI here
       this.lowerPanelBg.draw(0, 209)
 
-      this.font.draw("Build:", 61, 215)
+      this.font.draw("Build:", 61, 212)
 
       button.draw() for button in this.buildButtons
 
-
-
+      this.buildQueue.draw()
 
       this.leftPanelBg.draw(0, 181)
 
       this.font.draw("Minerals:", 1, 185)
-      this.font.draw(sprintf("%.0d (%+.0d)", this.minerals, this.mineralsPerSecond), 1, 193)
+      this.font.draw(sprintf(
+        "%.0d-%.0d=%+.0d",
+        this.mineralsProduced,
+        this.mineralsConsumed,
+        this.mineralsProduced - this.mineralsConsumed
+      ), 1, 193)
 
-      this.font.draw("Energy Used:", 1, 205)
-      this.font.draw(sprintf("%.0d/%.0d", this.usedEnergy, this.totalEnergy), 1, 213)
+      this.font.draw("Energy:", 1, 205)
+      this.font.draw(sprintf(
+        "%.0d-%.0d=%+.0d",
+        this.energyProduced,
+        this.energyConsumed,
+        this.energyProduced - this.energyConsumed
+      ), 1, 213)
+
+      this.font.draw("Production:", 1, 225)
+      this.font.draw(sprintf("%+.0d", this.production), 1, 233)
   )
 
   # Start the Game with 60fps, a resolution of 320x240, scaled
