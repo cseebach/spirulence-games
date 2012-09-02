@@ -327,6 +327,7 @@ ig.module(
       this.mineralsProduced = 0
       this.mineralsConsumed = 0
       this.production = 0
+      this.research = 1000
 
     updatePlaceEntity: (placeClass, buttonToUpdate) ->
       this.buttonToUpdate = buttonToUpdate
@@ -363,6 +364,8 @@ ig.module(
     legalPlacement: (x, y)->
       if x < 64
         return y < 176
+      else if x < 272
+        return y < 192
       else
         return y < 208
 
@@ -372,13 +375,19 @@ ig.module(
 
       # Add your own drawing code here
       # have to draw the UI here
+      this.lowerPanelBg.draw(-48, 198)
+      this.font.draw(sprintf("Research: %+.0d", this.research), 61, 202)
+
+      this.font.draw("This is an alert!", 140, 202)
+
       this.lowerPanelBg.draw(0, 209)
 
       this.font.draw("Build:", 61, 212)
-
       button.draw() for button in this.buildButtons
 
+      this.font.draw("Queue:", 200, 212)
       this.buildQueue.draw()
+
 
       this.leftPanelBg.draw(0, 181)
 
