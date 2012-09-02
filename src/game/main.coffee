@@ -7,6 +7,21 @@ ig.module(
 )
 .defines(() ->
 
+  Borehole = ig.Entity.extend(
+    size: {x:16, y:16}
+
+    collides: ig.Entity.COLLIDES.PASSIVE
+
+    animSheet: new ig.AnimationSheet("media/borehole.png", 16, 16)
+
+    init:(x, y, settings) ->
+      this.parent(x, y, settings)
+      this.addAnim("idle", 0.2, [0,0,0,1,2,3,4,4,3,2,1,0,0,0])
+
+    place: () ->
+
+  )
+
   Generator = ig.Entity.extend(
 
     size: {x:16, y:16}
@@ -82,6 +97,7 @@ ig.module(
       ig.input.bind(ig.KEY.F, 'factory_placement')
       ig.input.bind(ig.KEY.M, 'mine_placement')
       ig.input.bind(ig.KEY.G, 'generator_placement')
+      ig.input.bind(ig.KEY.B, 'borehole_placement')
 
       this.spawnEntity(BackGround, 0, 0)
       this.updatePlaceEntity(Factory)
@@ -123,6 +139,9 @@ ig.module(
 
       if ig.input.released("generator_placement")
         this.updatePlaceEntity(Generator)
+
+      if ig.input.released("borehole_placement")
+        this.updatePlaceEntity(Borehole)
 
     draw: () ->
       # Draw all entities and backgroundMaps
