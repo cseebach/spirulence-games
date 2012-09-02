@@ -3,9 +3,24 @@ ig.module(
 )
 .requires(
   'impact.game'
-  #'impact.font'
+  'impact.font'
 )
 .defines(() ->
+
+  ResearchCenter =ig.Entity.extend(
+    size: {x:16, y:16}
+
+    collides: ig.Entity.COLLIDES.PASSIVE
+
+    animSheet: new ig.AnimationSheet("media/research_center.png", 16, 16)
+
+    init:(x, y, settings) ->
+      this.parent(x, y, settings)
+      this.addAnim("idle", 0.1, [0,0,0,1,2,3,4,4,3,2,1,0,0,0])
+
+    place: () ->
+
+  )
 
   Borehole = ig.Entity.extend(
     size: {x:16, y:16}
@@ -18,8 +33,8 @@ ig.module(
       this.parent(x, y, settings)
       this.addAnim("idle", 0.2, [0,0,0,1,2,3,4,4,3,2,1,0,0,0])
 
-    place: () ->
 
+    place: () ->
   )
 
   Generator = ig.Entity.extend(
@@ -98,6 +113,7 @@ ig.module(
       ig.input.bind(ig.KEY.M, 'mine_placement')
       ig.input.bind(ig.KEY.G, 'generator_placement')
       ig.input.bind(ig.KEY.B, 'borehole_placement')
+      ig.input.bind(ig.KEY.R, 'research_placement')
 
       this.spawnEntity(BackGround, 0, 0)
       this.updatePlaceEntity(Factory)
@@ -142,6 +158,9 @@ ig.module(
 
       if ig.input.released("borehole_placement")
         this.updatePlaceEntity(Borehole)
+
+      if ig.input.released("research_placement")
+        this.updatePlaceEntity(ResearchCenter)
 
     draw: () ->
       # Draw all entities and backgroundMaps
