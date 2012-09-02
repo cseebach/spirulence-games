@@ -250,7 +250,7 @@ ig.module(
           this.costCompleted = 0
 
     getPercentDone:()->
-      return if this.costCompleted > 0.0 then this.costCompleted*16.0/this.queue[0].buildCost else 0.1
+      return if this.costCompleted > 0.0 then this.costCompleted*16.0/this.queue[0].buildCost else 0.001
 
     drawQueueItem: (button, i) ->
       this.queueBack.drawTile(this.x + i*16, this.y, 0, this.tileSize)
