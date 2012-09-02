@@ -314,6 +314,8 @@ ig.module(
         new BuildingButton(177, 224, DomeGenerator, "media/dome_generator.png", 5000, false)
       ]
 
+      this.alerts = ["Here's a sample alert!"]
+
       this.buildButtons[0].productionFinished()
       this.buildButtons[0].productionFinished()
       this.buildButtons[1].productionFinished()
@@ -328,6 +330,8 @@ ig.module(
       this.mineralsConsumed = 0
       this.production = 0
       this.research = 1000
+
+      this.researchGoal = {name:""}
 
     updatePlaceEntity: (placeClass, buttonToUpdate) ->
       this.buttonToUpdate = buttonToUpdate
@@ -364,10 +368,8 @@ ig.module(
     legalPlacement: (x, y)->
       if x < 64
         return y < 176
-      else if x < 272
-        return y < 192
       else
-        return y < 208
+        return y < 192
 
     draw: () ->
       # Draw all entities and backgroundMaps
@@ -375,11 +377,18 @@ ig.module(
 
       # Add your own drawing code here
       # have to draw the UI here
-      this.lowerPanelBg.draw(-48, 198)
-      this.font.draw(sprintf("Research: %+.0d", this.research), 61, 202)
 
-      this.font.draw("This is an alert!", 140, 202)
+      #alert pane
+      this.lowerPanelBg.draw(-32, 193)
+      if this.alerts.length > 0
+        this.font.draw(this.alerts[0], 61, 195)
 
+      # research info pane
+      this.lowerPanelBg.draw(-16, 201)
+      this.font.draw(sprintf("Research: %+.0d", this.research), 61, 203)
+      this.font.draw("Goal: #{this.researchGoal.name}", 140, 203)
+
+      #building pane
       this.lowerPanelBg.draw(0, 209)
 
       this.font.draw("Build:", 61, 212)
@@ -388,7 +397,7 @@ ig.module(
       this.font.draw("Queue:", 200, 212)
       this.buildQueue.draw()
 
-
+      #production pane
       this.leftPanelBg.draw(0, 181)
 
       this.font.draw("Minerals:", 1, 185)
