@@ -74,6 +74,7 @@ ig.module(
 
     # HUD graphics
     leftPanelBg: new ig.Image("media/left_panel.png")
+    lowerPanelBg: new ig.Image("media/lower_panel.png")
 
     init: () ->
       # Initialize your game here; bind keys etc.
@@ -129,6 +130,8 @@ ig.module(
 
       # Add your own drawing code here
       # have to draw the UI here
+      this.lowerPanelBg.draw(0, 209)
+
       this.leftPanelBg.draw(0, 181)
 
       this.font.draw("Minerals:", 1, 185)
