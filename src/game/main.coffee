@@ -237,11 +237,13 @@ ig.module(
       this.tileSize = 16
       this.queue = []
       this.costCompleted = 0
+      this.hover = null
 
     add: (buildButton) ->
       this.queue.push(buildButton)
 
     update:() ->
+      this.hover = null
       if this.queue.length > 0
         this.costCompleted += ig.game.production / 60.0
         if this.costCompleted >= this.queue[0].buildCost
@@ -249,8 +251,18 @@ ig.module(
           this.queue.shift()
           this.costCompleted = 0
 
+        if this.x < ig.input.mouse.x < this.x + this.tileSize*this.queue.length
+          if this.y < ig.input.mouse.y < this.y + this.tileSize
+            this.hover = Math.floor((ig.input.mouse.x - this.x)/16)
+            #this.hover = 1
+
+      if this.hover? and (ig.input.released("primary_button") or ig.input.released("secondary_button"))
+        this.queue[this.hover..this.hover] = []
+        if this.hover == 0
+            this.costCompleted = 0
+
     getPercentDone:()->
-      return if this.costCompleted > 0.0 then this.costCompleted*16.0/this.queue[0].buildCost else 0.001
+      return if this.costCompleted > 0.0 then this.costCompleted*16.0/this.queue[0].buildCost else 0.00001
 
     drawQueueItem: (button, i) ->
       this.queueBack.drawTile(this.x + i*16, this.y, 0, this.tileSize)
@@ -261,7 +273,9 @@ ig.module(
           this.getPercentDone(), 6)
 
     draw: () ->
-       this.drawQueueItem(button, i) for button, i in this.queue
+      this.drawQueueItem(button, i) for button, i in this.queue
+      if this.hover?
+        this.queueBack.drawTile(this.x + this.hover*16, this.y, 1, this.tileSize)
   )
 
   MyGame = ig.Game.extend(
