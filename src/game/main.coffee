@@ -113,7 +113,7 @@ ig.module(
       this.addAnim("idle", 0.2, [0,1,2,3,])
 
     getEnergyProduced: () ->
-      generators = generator for generator in ig.game.getEntitiesByType(Generator) when generator.placed
+      generators = (generator for generator in ig.game.getEntitiesByType(Generator) when generator.placed)
       energyProduced = 0
       energyProduced += 5 for generator in generators when generator.distanceTo(this) < 30
       return energyProduced
@@ -126,11 +126,11 @@ ig.module(
 
     animSheet: new ig.AnimationSheet("media/supercollider.png", 16, 16)
 
-    research: 20
+    research: 30
 
     energyConsumed: 50
 
-    productionCost: 2000
+    productionCost: 1000
 
     name: "Supercollider"
 
@@ -139,10 +139,10 @@ ig.module(
       this.addAnim("idle", 0.1, [0,0,0,0,0,0,0,0,0,1,2,3,4,5,6,7,8,9])
 
     getResearch:() ->
-      researchCenters = center for center in ig.game.getEntitiesByType(ResearchCenter) when center.placed
+      researchCenters = (center for center in ig.game.getEntitiesByType(ResearchCenter) when center.placed)
       research = this.research
-      research += 5 for center in researchCenters when center.distanceTo(this) < 30
-      return energyProduced
+      research += 10 for center in researchCenters when center.distanceTo(this) < 30
+      return research
   )
 
   ResearchCenter = Placeable.extend(
@@ -185,7 +185,7 @@ ig.module(
       this.addAnim("idle", 0.2, [0,0,0,1,2,3,4,4,3,2,1,0,0,0])
 
     getMineralsProduced:()->
-      mines = mine for mine in ig.game.getEntitiesByType(Mine) when mine.placed
+      mines = (mine for mine in ig.game.getEntitiesByType(Mine) when mine.placed)
       mineralsProduced = this.mineralsProduced
       mineralsProduced += 5 for mine in mines when mine.distanceTo(this) < 30
       return mineralsProduced
@@ -225,6 +225,14 @@ ig.module(
     init: (x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim('idle', 0.2, [0,1,2,3,4,4,4,4,4,4,4,3,2,1,0,0,0,0,0])
+
+    getMineralsProduced:()->
+      mineralsProduced = this.mineralsProduced
+      if advRobotics.researched
+        mineralsProduced += 1
+      if extremeRobotics.researched
+        mineralsProduced += 1
+      return mineralsProduced
   )
 
   Factory = Placeable.extend(
@@ -296,7 +304,10 @@ ig.module(
         ig.game.buildMessage = buildMessage.join(" ")
 
         if ig.input.released("secondary_button")
-          ig.game.buildQueue.add(this)
+          if ig.game.buildQueue.isFull()
+            ig.game.alerts.push({text:"Can't add to queue: queue is full.", time:80})
+          else
+            ig.game.buildQueue.add(this)
         if ig.input.released("primary_button") and this.queue.length > 0
           ig.game.updatePlaceEntity(this.queue[0], this)
       else
@@ -341,6 +352,9 @@ ig.module(
 
     add: (buildButton) ->
       this.queue.push([buildButton, ig.game.spawnEntity(buildButton.buildingClass, -100,-100)])
+
+    isFull:() ->
+      return this.queue.length >= 7
 
     update:() ->
       this.hover = null
@@ -561,6 +575,14 @@ ig.module(
 
         this.buildQueue.update()
 
+        if this.researchGoal.cost?
+          this.researchCompleted += this.research/60.0
+          if this.researchCompleted > this.researchGoal.cost
+            this.researchGoal.onResearched()
+            this.researchGoal.researched = true
+            this.researchCompleted = 0
+            this.researchGoal = {name:""}
+
         placeX = Math.floor(ig.input.mouse.x/16)*16
         placeY = Math.floor(ig.input.mouse.y/16)*16
 
@@ -581,6 +603,10 @@ ig.module(
 
         if ig.input.released("primary_button") and  304 > ig.input.mouse.x > 58 and 212 > ig.input.mouse.y > 203
           this.showingResearchPane = true
+          this.availableTechs = (tech for tech in techs when tech.enabled and not tech.researched)
+          this.currentlyDisplayedTech = 0
+          if this.availableTechs.length == 0
+            this.currentDisplayedTech = -1
 
         if this.showingResearchPane
           this.researchPaneButtonHovered = null
@@ -591,8 +617,9 @@ ig.module(
               this.researchPaneButtonHovered = "close"
 
           if this.researchPaneButtonHovered == "choose" and ig.input.released("primary_button")
-            this.researchGoal = this.currentlyDisplayedTech
+            this.researchGoal = this.availableTechs[this.currentlyDisplayedTech]
             this.showingResearchPane = false
+            this.researchCompleted = 0
           else if this.researchPaneButtonHovered == "close" and ig.input.released("primary_button")
             this.showingResearchPane = false
 
@@ -604,9 +631,14 @@ ig.module(
               this.availableResearchSwitchButtonHovered = "<"
 
           if this.availableResearchSwitchButtonHovered == "<" and ig.input.released("primary_button")
-            #move available tech <
+            this.currentlyDisplayedTech -= 1
+            if this.currentlyDisplayedTech == -1
+              this.currentlyDisplayedTech = this.availableTechs.length - 1
           else if this.availableResearchSwitchButtonHovered == ">" and ig.input.released("primary_button")
-            #move available tech >
+            this.currentlyDisplayedTech += 1
+            if this.currentlyDisplayedTech >= this.availableTechs.length
+              this.currentlyDisplayedTech = 0
+
 
       if ig.input.released("pause")
         this.paused = not this.paused
@@ -680,7 +712,7 @@ ig.module(
           this.caretBg.drawTile(132, 0, 0, 8)
 
         this.font.draw("Available Research Goals:   < >", 3, 1)
-        tech = techs[2]
+        tech = this.availableTechs[this.currentlyDisplayedTech]
         this.font.draw(tech.name, 3, 15)
         this.font.draw(tech.bonus, 3, 25)
 
