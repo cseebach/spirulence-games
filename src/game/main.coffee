@@ -209,6 +209,9 @@ ig.module(
 
       this.researchPaneButtonHovered = null
 
+      this.winning = false
+      this.timeLeft = 36000
+
     updatePlaceEntity: (placeEntity, buttonToUpdate) ->
       this.buttonToUpdate = buttonToUpdate
       if this.placeEntity?
@@ -311,11 +314,14 @@ ig.module(
             if this.currentlyDisplayedTech >= this.availableTechs.length
               this.currentlyDisplayedTech = 0
 
+        this.timeLeft -= 1
+        if this.timeLeft <= 0
+          this.paused = true
 
       if ig.input.released("pause")
         this.paused = not this.paused
 
-    inGUI:(x, y) -> (x < 64 and y > 176) or y > 192
+    inGUI:(x, y) -> (x <= 64 and y >= 176) or y >= 192
 
     legalPlacement: (x, y)->
       sameSpot = (true for entity in this.entities when entity.pos.x == x and entity.pos.y == y)
@@ -347,6 +353,10 @@ ig.module(
 
       this.font.draw("Queue:", 200, 212)
       this.buildQueue.draw()
+
+      #time pane
+      this.panelBg.draw(-270, 173)
+      this.font.draw("T-: "+this.timeLeft, 0, 175)
 
       #production pane
       this.panelBg.draw(-262, 181)
@@ -402,6 +412,12 @@ ig.module(
 
       if this.paused
         this.pauseBlackout.draw(0,0)
+
+        if this.winning
+          this.font.draw("You win!", 160, 120, ig.Font.ALIGN.CENTER)
+
+        if this.timeLeft <= 0
+          this.font.draw("You lose.", 160, 120, ig.Font.ALIGN.CENTER)
   )
 
   # Start the Game with 60fps, a resolution of 320x240, scaled
