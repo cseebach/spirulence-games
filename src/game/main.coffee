@@ -33,8 +33,10 @@ ig.module(
 
     canPlace:()->
       if this.getMineralsConsumed() >  ig.game.mineralsProduced - ig.game.mineralsConsumed
+        ig.game.alerts.push({time:120, text:"Can't place building: not enough minerals."})
         return false
       if this.getEnergyConsumed() >  ig.game.energyProduced - ig.game.energyConsumed
+        ig.game.alerts.push({time:120, text:"Can't place building: not enough energy."})
         return false
       return true
 
@@ -75,6 +77,8 @@ ig.module(
 
     productionCost: 3000
 
+    name: "Dome Generator"
+
     init:(x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim("idle", 0.05, [0,1,2,3,4,5,6,7])
@@ -102,6 +106,8 @@ ig.module(
 
     productionCost: 1000
 
+    name: "Quantum-Optical Comptroller"
+
     init:(x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim("idle", 0.2, [0,1,2,3,])
@@ -125,6 +131,8 @@ ig.module(
     energyConsumed: 50
 
     productionCost: 2000
+
+    name: "Supercollider"
 
     init:(x, y, settings) ->
       this.parent(x, y, settings)
@@ -150,6 +158,8 @@ ig.module(
 
     productionCost: 100
 
+    name: "Research Center"
+
     init:(x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim("idle", 0.1, [0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,4,3,2,1,0,0,0])
@@ -168,6 +178,8 @@ ig.module(
 
     mineralsProduced: 20
 
+    name: "Asthenosphere Borehole"
+
     init:(x, y, settings) ->
       this.parent(x, y, settings)
       this.addAnim("idle", 0.2, [0,0,0,1,2,3,4,4,3,2,1,0,0,0])
@@ -184,6 +196,8 @@ ig.module(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
+
+    name: "Wind Generator"
 
     animSheet: new ig.AnimationSheet('media/generator.png', 16, 16)
 
@@ -202,6 +216,8 @@ ig.module(
 
     animSheet: new ig.AnimationSheet("media/mine.png", 16 ,16)
 
+    name: "Mine"
+
     energyConsumed: 2
     mineralsProduced: 3
     productionCost: 40
@@ -217,6 +233,8 @@ ig.module(
     collides: ig.Entity.COLLIDES.PASSIVE
 
     animSheet: new ig.AnimationSheet("media/factory.png", 16 ,16)
+
+    name: "Factory"
 
     energyConsumed: 6
     mineralsConsumed: 6
@@ -244,22 +262,39 @@ ig.module(
     buttonBack: new ig.Image("media/button.png")
 
     init: (x, y, buildingClass, enabled) ->
-      tempInstance = new buildingClass(-100, -100, {})
+      this.instance = new buildingClass()
 
       this.x = x
       this.y = y
       this.size = 16
       this.buildingClass = buildingClass
-      this.image = tempInstance.animSheet.image
       this.enabled = if enabled? then enabled else true
       this.hovered = false
       this.queue = []
 
-      tempInstance.kill()
-
     update: ()->
       if this.x < ig.input.mouse.x < this.x + this.size and this.y < ig.input.mouse.y < this.y + this.size and this.enabled
         this.hovered = true
+
+        ig.game.hoverInfo = this.instance.name
+        buildMessage = []
+        if this.instance.getMineralsConsumed() > 0
+          buildMessage.push(sprintf("M-%.0d", this.instance.getMineralsConsumed()))
+        if this.instance.getMineralsProduced() > 0
+          buildMessage.push(sprintf("M+%.0d", this.instance.getMineralsProduced()))
+        if this.instance.getEnergyConsumed() > 0
+          buildMessage.push(sprintf("E-%.0d", this.instance.getEnergyConsumed()))
+        if this.instance.getEnergyProduced() > 0
+          buildMessage.push(sprintf("E+%.0d", this.instance.getEnergyProduced()))
+        if this.instance.getProductionCost() > 0
+          buildMessage.push(sprintf("P%.0d", this.instance.getProductionCost()))
+        if this.instance.getProductionProduced() > 0
+          buildMessage.push(sprintf("P+%.0d", this.instance.getProductionProduced()))
+        if this.instance.getResearch() > 0
+          buildMessage.push(sprintf("R+%.0d", this.instance.getResearch()))
+
+        ig.game.buildMessage = buildMessage.join(" ")
+
         if ig.input.released("secondary_button")
           ig.game.buildQueue.add(this)
         if ig.input.released("primary_button") and this.queue.length > 0
@@ -269,6 +304,9 @@ ig.module(
 
     productionFinished: (entity) ->
       this.queue.push(entity)
+
+    getBuildingImage:()->
+      this.instance.animSheet.image
 
     buildingPlaced: () ->
       this.queue.shift()
@@ -282,7 +320,7 @@ ig.module(
         this.buttonBack.drawTile(this.x, this.y, 1, this.size)
       else
         this.buttonBack.drawTile(this.x, this.y, 0, this.size)
-      this.image.drawTile(this.x, this.y, 0, this.size)
+      this.instance.animSheet.image.drawTile(this.x, this.y, 0, this.size)
       if not this.enabled
         this.buttonBack.drawTile(this.x, this.y, 1, this.size)
 
@@ -329,7 +367,7 @@ ig.module(
 
     drawQueueItem: (button, i) ->
       this.queueBack.drawTile(this.x + i*16, this.y, 0, this.tileSize)
-      button.image.drawTile(this.x + i*16, this.y, 0, this.tileSize)
+      button.getBuildingImage().drawTile(this.x + i*16, this.y, 0, this.tileSize)
       if i == 0
         this.queueBack.draw(this.x, this.y-6,
           32, 0,
@@ -455,8 +493,8 @@ ig.module(
         new BuildingButton(177, 224, DomeGenerator, false)
       ]
 
-      this.alerts = [{text:"Here's a sample alert!", time:120}]
-      this.priorityAlert = null
+      this.alerts = [{text:"Welcome to Windmaster.", time:120}]
+      this.hoverInfo = null
 
       this.buildButtons[0].productionFinished(ig.game.spawnEntity(Mine, -100, -100))
       this.buildButtons[0].productionFinished(ig.game.spawnEntity(Mine, -100, -100))
@@ -469,6 +507,7 @@ ig.module(
       this.updateEconomyState()
 
       this.researchGoal = {name:""}
+      this.buildMessage = ""
 
     updatePlaceEntity: (placeEntity, buttonToUpdate) ->
       this.buttonToUpdate = buttonToUpdate
@@ -500,6 +539,9 @@ ig.module(
       if not this.paused
         this.updateEconomyState()
 
+        this.hoverInfo = null
+        this.buildMessage = ""
+
         # Update all entities and backgroundMaps
         this.parent();
 
@@ -511,7 +553,8 @@ ig.module(
         placeY = Math.floor(ig.input.mouse.y/16)*16
 
         # Add your own, additional update code here
-        if ig.input.released("primary_button") and this.legalPlacement(placeX, placeY)
+        if ig.input.released("primary_button")
+          if not this.inGUI(placeX, placeY) and this.legalPlacement(placeX, placeY)
             if this.placeEntity? and this.placeEntity.canPlace()
               this.placeEntity.place()
               if this.buttonToUpdate?
@@ -528,22 +571,24 @@ ig.module(
       if ig.input.released("pause")
         this.paused = not this.paused
 
+    inGUI:(x, y) -> (x < 64 and y > 176) or y > 192
+
     legalPlacement: (x, y)->
-      if x < 64
-        return y < 176
-      else
-        return y < 192
+      sameSpot = (true for entity in this.entities when entity.pos.x == x and entity.pos.y == y)
+      if sameSpot.length > 1
+        this.alerts.push({time:120, text:"Can't place building there: space occupied."})
+        return false
+      return true
 
     draw: () ->
       # Draw all entities and backgroundMaps
       this.parent();
 
-      # Add your own drawing code here
-      # have to draw the UI here
-
       #alert pane
       this.panelBg.draw(-32, 193)
-      if this.alerts.length > 0
+      if this.hoverInfo?
+        this.font.draw(this.hoverInfo, 61, 195)
+      else if this.alerts.length > 0
         this.font.draw(this.alerts[0].text, 61, 195)
 
       # research info pane
@@ -553,8 +598,7 @@ ig.module(
 
       #building pane
       this.panelBg.draw(0, 209)
-
-      this.font.draw("Build:", 61, 212)
+      this.font.draw("Build: #{this.buildMessage}", 61, 212)
       button.draw() for button in this.buildButtons
 
       this.font.draw("Queue:", 200, 212)
