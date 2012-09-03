@@ -385,7 +385,7 @@ ig.module(
     researched: false
     name: "Advanced Robotics"
     desc: "Awesome robots work the mines more efficiently than humans!"
-    bonuses: "Increases the efficiency of your mines."
+    bonus: "Increases the efficiency of your mines."
     quote: "Beep. Whiirrrrrrrrr."
 
     onResearched: ()->
@@ -398,8 +398,7 @@ ig.module(
     name: "Extreme Environment Robotics"
     desc: "Remote control of robots under extreme conditions renders a whole new class
           of exploratory and geology problems solvable."
-    bonus: "Further increases the efficiency of your mines. Enables construction of
-           Asthenosphere Boreholes."
+    bonus: "Further increases the efficiency of your mines. Enables construction of\nAsthenosphere Boreholes."
     quote: "Beep. <lava bubble>. Whirrr."
 
     onResearched: ()->
@@ -463,6 +462,11 @@ ig.module(
       ig.game.winning = true
       ig.game.winCondition = "secrets"
 
+  techs = [
+    advRobotics, extremeRobotics, highEnergyPhysics, quantumComputing,
+    theoryOfEverything, secretsOfTheUniverse
+  ]
+
   MyGame = ig.Game.extend(
 
     # Load a font
@@ -470,6 +474,8 @@ ig.module(
 
     # HUD graphics
     panelBg: new ig.Image("media/blue_bg.png")
+    smallTextBg: new ig.Image("media/small_text_button_bg.png")
+    caretBg: new ig.Image("media/caret_button_bg.png")
 
     init: () ->
       # Initialize your game here; bind keys etc.
@@ -496,6 +502,10 @@ ig.module(
       this.alerts = [{text:"Welcome to Windmaster.", time:120}]
       this.hoverInfo = null
 
+      this.showingResearchPane = false
+      this.currentDisplayedTech = null
+      this.availableTechs = null
+
       this.buildButtons[0].productionFinished(ig.game.spawnEntity(Mine, -100, -100))
       this.buildButtons[0].productionFinished(ig.game.spawnEntity(Mine, -100, -100))
       this.buildButtons[1].productionFinished(ig.game.spawnEntity(Generator, -100, -100))
@@ -508,6 +518,8 @@ ig.module(
 
       this.researchGoal = {name:""}
       this.buildMessage = ""
+
+      this.researchPaneButtonHovered = null
 
     updatePlaceEntity: (placeEntity, buttonToUpdate) ->
       this.buttonToUpdate = buttonToUpdate
@@ -553,12 +565,11 @@ ig.module(
         placeY = Math.floor(ig.input.mouse.y/16)*16
 
         # Add your own, additional update code here
-        if ig.input.released("primary_button")
+        if ig.input.released("primary_button") and this.placeEntity? and this.placeEntity.canPlace()
           if not this.inGUI(placeX, placeY) and this.legalPlacement(placeX, placeY)
-            if this.placeEntity? and this.placeEntity.canPlace()
-              this.placeEntity.place()
-              if this.buttonToUpdate?
-                this.buttonToUpdate.buildingPlaced()
+            this.placeEntity.place()
+            if this.buttonToUpdate?
+              this.buttonToUpdate.buildingPlaced()
         else if this.placeEntity
           this.placeEntity.pos.x = placeX
           this.placeEntity.pos.y = placeY
@@ -567,6 +578,35 @@ ig.module(
           this.alerts[0].time -= 1
           if this.alerts[0].time <= 0
             this.alerts.shift()
+
+        if ig.input.released("primary_button") and  304 > ig.input.mouse.x > 58 and 212 > ig.input.mouse.y > 203
+          this.showingResearchPane = true
+
+        if this.showingResearchPane
+          this.researchPaneButtonHovered = null
+          if 316 > ig.input.mouse.x >= 280
+            if 10 > ig.input.mouse.y >= 2
+              this.researchPaneButtonHovered = "choose"
+            else if 18 > ig.input.mouse.y >= 10
+              this.researchPaneButtonHovered = "close"
+
+          if this.researchPaneButtonHovered == "choose" and ig.input.released("primary_button")
+            this.researchGoal = this.currentlyDisplayedTech
+            this.showingResearchPane = false
+          else if this.researchPaneButtonHovered == "close" and ig.input.released("primary_button")
+            this.showingResearchPane = false
+
+          this.availableResearchSwitchButtonHovered = null
+          if 8 >= ig.input.mouse.y >= 1
+            if 140 > ig.input.mouse.x >= 132
+              this.availableResearchSwitchButtonHovered = ">"
+            else if 132 > ig.input.mouse.x >= 124
+              this.availableResearchSwitchButtonHovered = "<"
+
+          if this.availableResearchSwitchButtonHovered == "<" and ig.input.released("primary_button")
+            #move available tech <
+          else if this.availableResearchSwitchButtonHovered == ">" and ig.input.released("primary_button")
+            #move available tech >
 
       if ig.input.released("pause")
         this.paused = not this.paused
@@ -625,6 +665,36 @@ ig.module(
 
       this.font.draw("Production:", 1, 225)
       this.font.draw(sprintf("%+.0d", this.production), 1, 233)
+
+      if this.showingResearchPane
+        this.panelBg.draw(0, -190)
+
+        if this.availableResearchSwitchButtonHovered == "<"
+          this.caretBg.drawTile(124, 0, 1, 8)
+        else
+          this.caretBg.drawTile(124, 0, 0, 8)
+
+        if this.availableResearchSwitchButtonHovered == ">"
+          this.caretBg.drawTile(132, 0, 1, 8)
+        else
+          this.caretBg.drawTile(132, 0, 0, 8)
+
+        this.font.draw("Available Research Goals:   < >", 3, 1)
+        tech = techs[2]
+        this.font.draw(tech.name, 3, 15)
+        this.font.draw(tech.bonus, 3, 25)
+
+        if this.researchPaneButtonHovered == "choose"
+          this.smallTextBg.drawTile(280, 2, 1, 36, 8)
+        else
+          this.smallTextBg.drawTile(280, 2, 0, 36, 8)
+        this.font.draw("CHOOSE", 298, 3, ig.Font.ALIGN.CENTER)
+
+        if this.researchPaneButtonHovered == "close"
+          this.smallTextBg.drawTile(280, 10, 1, 36, 8)
+        else
+          this.smallTextBg.drawTile(280, 10, 0, 36, 8)
+        this.font.draw("CLOSE", 298, 11, ig.Font.ALIGN.CENTER)
 
       if this.paused
         this.pauseBlackout.draw(0,0)
