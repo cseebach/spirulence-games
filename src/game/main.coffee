@@ -587,11 +587,9 @@ ig.module(
         placeY = Math.floor(ig.input.mouse.y/16)*16
 
         # Add your own, additional update code here
-        if ig.input.released("primary_button") and this.placeEntity? and this.placeEntity.canPlace()
-          if not this.inGUI(placeX, placeY) and this.legalPlacement(placeX, placeY)
-            this.placeEntity.place()
-            if this.buttonToUpdate?
-              this.buttonToUpdate.buildingPlaced()
+        if ig.input.released("primary_button") and not this.inGUI(placeX, placeY) and this.placeEntity? and this.placeEntity.canPlace() and this.legalPlacement(placeX, placeY)
+          this.placeEntity.place()
+          this.buttonToUpdate.buildingPlaced()
         else if this.placeEntity
           this.placeEntity.pos.x = placeX
           this.placeEntity.pos.y = placeY
