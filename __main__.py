@@ -1,3 +1,4 @@
+from gevent import monkey; monkey.patch_all()
 import bottle
 from bottle.ext import sqlite
 
@@ -36,4 +37,4 @@ def game_levels(jsfile):
 def game_assets(asset):
     return bottle.static_file(asset, "media/")
 
-bottle.run(app, host="0.0.0.0", port=8081)
+bottle.run(app, host="0.0.0.0", port=8081, server="gevent")
