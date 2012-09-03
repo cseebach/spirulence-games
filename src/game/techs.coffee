@@ -57,7 +57,7 @@ ig.module(
 
       onResearched:()->
         ig.game.buildButtons[6].enabled = true
-        techs.unifiedTheory.enabled = true
+        techs.theoryOfEverything.enabled = true
 
     theoryOfEverything:
       cost: 3000

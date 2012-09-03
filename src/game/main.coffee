@@ -164,12 +164,13 @@ ig.module(
     panelBg: new ig.Image("media/blue_bg.png")
     smallTextBg: new ig.Image("media/small_text_button_bg.png")
     caretBg: new ig.Image("media/caret_button_bg.png")
+    pauseBlackout: new ig.Image("media/pause_blackout.png")
 
     init: () ->
       # Initialize your game here; bind keys etc.
       ig.input.bind(ig.KEY.MOUSE1, 'primary_button')
       ig.input.bind(ig.KEY.MOUSE2, 'secondary_button')
-      ig.input.bind(ig.KEY.SPACE, "pause")
+      ig.input.bind(ig.KEY.SPACE, 'pause')
 
       this.paused = false
 
@@ -210,7 +211,7 @@ ig.module(
       this.researchPaneButtonHovered = null
 
       this.winning = false
-      this.timeLeft = 36000
+      this.timeLeft = 29000
 
     updatePlaceEntity: (placeEntity, buttonToUpdate) ->
       this.buttonToUpdate = buttonToUpdate
