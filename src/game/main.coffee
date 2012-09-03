@@ -316,7 +316,6 @@ ig.module(
         if this.x < ig.input.mouse.x < this.x + this.tileSize*this.queue.length
           if this.y < ig.input.mouse.y < this.y + this.tileSize
             this.hover = Math.floor((ig.input.mouse.x - this.x)/16)
-            #this.hover = 1
 
       if this.hover? and (ig.input.released("primary_button") or ig.input.released("secondary_button"))
         this.queue[this.hover..this.hover] = []
@@ -432,9 +431,7 @@ ig.module(
     font: new ig.Font( 'media/04b03.font.png' )
 
     # HUD graphics
-    leftPanelBg: new ig.Image("media/left_panel.png")
-    lowerPanelBg: new ig.Image("media/lower_panel.png")
-    pauseBlackout: new ig.Image("media/pause_blackout.png")
+    panelBg: new ig.Image("media/blue_bg.png")
 
     init: () ->
       # Initialize your game here; bind keys etc.
@@ -545,17 +542,17 @@ ig.module(
       # have to draw the UI here
 
       #alert pane
-      this.lowerPanelBg.draw(-32, 193)
+      this.panelBg.draw(-32, 193)
       if this.alerts.length > 0
         this.font.draw(this.alerts[0].text, 61, 195)
 
       # research info pane
-      this.lowerPanelBg.draw(-16, 201)
+      this.panelBg.draw(-16, 201)
       this.font.draw(sprintf("Research: %+.0d", this.research), 61, 203)
       this.font.draw("Goal: #{this.researchGoal.name}", 140, 203)
 
       #building pane
-      this.lowerPanelBg.draw(0, 209)
+      this.panelBg.draw(0, 209)
 
       this.font.draw("Build:", 61, 212)
       button.draw() for button in this.buildButtons
@@ -564,7 +561,7 @@ ig.module(
       this.buildQueue.draw()
 
       #production pane
-      this.leftPanelBg.draw(0, 181)
+      this.panelBg.draw(-262, 181)
 
       this.font.draw("Minerals:", 1, 185)
       this.font.draw(sprintf(
