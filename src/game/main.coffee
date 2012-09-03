@@ -122,7 +122,7 @@ ig.module(
 
     research: 20
 
-    energyCost: 50
+    energyConsumed: 50
 
     productionCost: 2000
 
@@ -144,7 +144,7 @@ ig.module(
 
     animSheet: new ig.AnimationSheet("media/research_center.png", 16, 16)
 
-    energyCost: 10
+    energyConsumed: 10
 
     research: 10
 
@@ -162,7 +162,7 @@ ig.module(
 
     animSheet: new ig.AnimationSheet("media/borehole.png", 16, 16)
 
-    energyCost: 20
+    energyConsumed: 20
 
     productionCost: 200
 
@@ -202,7 +202,7 @@ ig.module(
 
     animSheet: new ig.AnimationSheet("media/mine.png", 16 ,16)
 
-    energyCost: 1
+    energyConsumed: 2
     mineralsProduced: 3
     productionCost: 40
 
@@ -218,8 +218,8 @@ ig.module(
 
     animSheet: new ig.AnimationSheet("media/factory.png", 16 ,16)
 
-    energyCost: 6
-    mineralsCost: 6
+    energyConsumed: 6
+    mineralsConsumed: 6
     productionProduced: 3
     productionCost: 100
 
@@ -517,8 +517,8 @@ ig.module(
         if ig.input.released("primary_button") and this.legalPlacement(placeX, placeY)
             if this.placeEntity? and this.placeEntity.canPlace()
               this.placeEntity.place()
-            if this.buttonToUpdate?
-              this.buttonToUpdate.buildingPlaced()
+              if this.buttonToUpdate?
+                this.buttonToUpdate.buildingPlaced()
         else if this.placeEntity
           this.placeEntity.pos.x = placeX
           this.placeEntity.pos.y = placeY
