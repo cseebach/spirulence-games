@@ -159,10 +159,12 @@ ig.module(
 
     # Load a font
     font: new ig.Font( 'media/04b03.font.png' )
+    redFont: new ig.Font( 'media/04b03_red.font.png' )
 
     # HUD graphics
     panelBg: new ig.Image("media/blue_bg.png")
     smallTextBg: new ig.Image("media/small_text_button_bg.png")
+    goalButtonBg: new ig.Image("media/goal_button_bg.png")
     caretBg: new ig.Image("media/caret_button_bg.png")
     pauseBlackout: new ig.Image("media/pause_blackout.png")
 
@@ -211,7 +213,7 @@ ig.module(
       this.researchPaneButtonHovered = null
 
       this.winning = false
-      this.timeLeft = 29000
+      this.timeLeft = 36000
 
     updatePlaceEntity: (placeEntity, buttonToUpdate) ->
       this.buttonToUpdate = buttonToUpdate
@@ -277,12 +279,18 @@ ig.module(
           if this.alerts[0].time <= 0
             this.alerts.shift()
 
-        if ig.input.released("primary_button") and  304 > ig.input.mouse.x > 58 and 212 > ig.input.mouse.y > 203
-          this.showingResearchPane = true
-          this.availableTechs = (tech for name, tech of techs when tech.enabled and not tech.researched)
-          this.currentlyDisplayedTech = 0
-          if this.availableTechs.length == 0
-            this.currentDisplayedTech = -1
+        this.goalButtonHovered = false
+        if 160 > ig.input.mouse.x >= 138 and 210 > ig.input.mouse.y >= 202
+          this.goalButtonHovered = true
+          if ig.input.released("primary_button")
+            if not this.showingResearchPane
+              this.showingResearchPane = true
+              this.availableTechs = (tech for name, tech of techs when tech.enabled and not tech.researched)
+              this.currentlyDisplayedTech = 0
+              if this.availableTechs.length == 0
+                this.currentDisplayedTech = -1
+            else
+              this.showingResearchPane = false
 
         if this.showingResearchPane
           this.researchPaneButtonHovered = null
@@ -340,11 +348,15 @@ ig.module(
       if this.hoverInfo?
         this.font.draw(this.hoverInfo, 61, 195)
       else if this.alerts.length > 0
-        this.font.draw(this.alerts[0].text, 61, 195)
+        this.redFont.draw(this.alerts[0].text, 61, 195)
 
       # research info pane
       this.panelBg.draw(-16, 201)
       this.font.draw(sprintf("Research: %+.0d", this.research), 61, 203)
+      if this.goalButtonHovered
+        this.goalButtonBg.drawTile(138, 202, 1, 22, 8)
+      else
+        this.goalButtonBg.drawTile(138, 202, 0, 22, 8)
       this.font.draw("Goal: #{this.researchGoal.name}", 140, 203)
 
       #building pane

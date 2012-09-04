@@ -9,9 +9,8 @@ db_plugin = sqlite.Plugin(dbfile="windmaster.db")
 app.install(db_plugin)
 
 @app.route("/")
-@bottle.view("main.html")
 def game():
-    return dict()
+    return bottle.static_file("main.html", ".")
 
 @app.route("/lib/<othercode>")
 def other_code(othercode):
@@ -37,4 +36,5 @@ def game_levels(jsfile):
 def game_assets(asset):
     return bottle.static_file(asset, "media/")
 
-bottle.run(app, host="0.0.0.0", port=8081, server="gevent")
+if __name__ == "__main__":
+    bottle.run(app, host="0.0.0.0", port=8081, server="gevent")
