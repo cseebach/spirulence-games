@@ -9,7 +9,7 @@ db_plugin = sqlite.Plugin(dbfile="windmaster.db")
 app.install(db_plugin)
 
 @app.route("/")
-@app.view("main.html")
+@bottle.view("main.html")
 def game():
     return dict()
 
