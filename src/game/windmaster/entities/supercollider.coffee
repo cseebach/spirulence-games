@@ -1,15 +1,15 @@
 ig.module(
-  'game.entities.supercollider'
+  'game.windmaster.entities.supercollider'
 ).requires(
   'impact.game'
-  'game.entities.placeable'
+  'game.windmaster.entities.placeable'
 ).defines ->
   window.Supercollider = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
 
-    animSheet: new ig.AnimationSheet("media/supercollider.png", 16, 16)
+    animSheet: new ig.AnimationSheet("media/windmaster/supercollider.png", 16, 16)
 
     research: 30
 

@@ -1,16 +1,16 @@
 ig.module(
-  "game.entities.borehole"
+  "game.windmaster.entities.borehole"
 ).requires(
   'impact.game'
   'impact.animation'
-  'game.entities.placeable'
+  'game.windmaster.entities.placeable'
 ).defines ->
   window.Borehole = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
 
-    animSheet: new ig.AnimationSheet("media/borehole.png", 16, 16)
+    animSheet: new ig.AnimationSheet("media/windmaster/borehole.png", 16, 16)
 
     energyConsumed: 20
 

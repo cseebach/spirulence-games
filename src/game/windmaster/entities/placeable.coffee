@@ -1,5 +1,5 @@
 ig.module(
-  "game.entities.placeable"
+  "game.windmaster.entities.placeable"
 ).requires(
   "impact.entity"
   "impact.game"

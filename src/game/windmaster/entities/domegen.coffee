@@ -1,15 +1,15 @@
 ig.module(
-  'game.entities.domegen'
+  'game.windmaster.entities.domegen'
 ).requires(
   'impact.game'
-  'game.entities.placeable'
+  'game.windmaster.entities.placeable'
 ).defines ->
   window.DomeGenerator = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
 
-    animSheet: new ig.AnimationSheet("media/dome_generator.png", 16, 16)
+    animSheet: new ig.AnimationSheet("media/windmaster/dome_generator.png", 16, 16)
 
     energyConsumed: 100
 

@@ -1,9 +1,9 @@
 ig.module(
-  "game.entities.generator"
+  "game.windmaster.entities.generator"
 ).requires(
   'impact.game'
   'impact.animation'
-  'game.entities.placeable'
+  'game.windmaster.entities.placeable'
 ).defines ->
   window.Generator = Placeable.extend(
 
@@ -13,7 +13,7 @@ ig.module(
 
     name: "Wind Generator"
 
-    animSheet: new ig.AnimationSheet('media/generator.png', 16, 16)
+    animSheet: new ig.AnimationSheet('media/windmaster/generator.png', 16, 16)
 
     productionCost: 40
     energyProduced: 6

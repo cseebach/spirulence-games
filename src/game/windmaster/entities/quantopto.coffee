@@ -1,15 +1,15 @@
 ig.module(
-  'game.entities.quantopto'
+  'game.windmaster.entities.quantopto'
 ).requires(
   'impact.game'
-  'game.entities.placeable'
+  'game.windmaster.entities.placeable'
 ).defines ->
   window.QuantomOptoComptroller = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
 
-    animSheet: new ig.AnimationSheet("media/qo_comptroller.png", 16, 16)
+    animSheet: new ig.AnimationSheet("media/windmaster/qo_comptroller.png", 16, 16)
 
     energyConsumed: 10
 

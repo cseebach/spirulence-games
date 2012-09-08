@@ -1,16 +1,16 @@
 ig.module(
-  "game.entities.factory"
+  "game.windmaster.entities.factory"
 ).requires(
   'impact.game'
   'impact.animation'
-  'game.entities.placeable'
+  'game.windmaster.entities.placeable'
 ).defines ->
   window.Factory = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
 
-    animSheet: new ig.AnimationSheet("media/factory.png", 16 ,16)
+    animSheet: new ig.AnimationSheet("media/windmaster/factory.png", 16 ,16)
 
     name: "Factory"
 

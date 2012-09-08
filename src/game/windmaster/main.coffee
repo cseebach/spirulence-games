@@ -1,26 +1,26 @@
 ig.module(
-  'game.main'
+  'game.windmaster.main'
 )
 .requires(
   'impact.game'
   'impact.font'
-  'game.techs'
-  'game.entities.placeable'
-  'game.entities.quantopto'
-  'game.entities.domegen'
-  'game.entities.supercollider'
-  'game.entities.researchcenter'
-  'game.entities.borehole'
-  'game.entities.mine'
-  'game.entities.factory'
-  'game.entities.generator'
+  'game.windmaster.techs'
+  'game.windmaster.entities.placeable'
+  'game.windmaster.entities.quantopto'
+  'game.windmaster.entities.domegen'
+  'game.windmaster.entities.supercollider'
+  'game.windmaster.entities.researchcenter'
+  'game.windmaster.entities.borehole'
+  'game.windmaster.entities.mine'
+  'game.windmaster.entities.factory'
+  'game.windmaster.entities.generator'
 )
 .defines(() ->
   BackGround = ig.Entity.extend(
 
     size: {x:320, y:240}
     zIndex: 50
-    animSheet: new ig.AnimationSheet("media/background.png", 320, 240)
+    animSheet: new ig.AnimationSheet("media/windmaster/background.png", 320, 240)
 
     init: (x, y, settings) ->
       this.parent(x, y, settings)
@@ -29,7 +29,7 @@ ig.module(
 
   BuildingButton = ig.Class.extend(
 
-    buttonBack: new ig.Image("media/button.png")
+    buttonBack: new ig.Image("media/windmaster/button.png")
 
     init: (x, y, buildingClass, enabled) ->
       this.instance = new buildingClass()
@@ -102,7 +102,7 @@ ig.module(
 
   BuildQueue = ig.Class.extend(
 
-    queueBack: new ig.Image("media/queue_button.png")
+    queueBack: new ig.Image("media/windmaster/queue_button.png")
 
     init: (x, y) ->
       this.x = x
@@ -162,11 +162,11 @@ ig.module(
     redFont: new ig.Font( 'media/04b03_red.font.png' )
 
     # HUD graphics
-    panelBg: new ig.Image("media/blue_bg.png")
-    smallTextBg: new ig.Image("media/small_text_button_bg.png")
-    goalButtonBg: new ig.Image("media/goal_button_bg.png")
-    caretBg: new ig.Image("media/caret_button_bg.png")
-    pauseBlackout: new ig.Image("media/pause_blackout.png")
+    panelBg: new ig.Image("media/windmaster/blue_bg.png")
+    smallTextBg: new ig.Image("media/windmaster/small_text_button_bg.png")
+    goalButtonBg: new ig.Image("media/windmaster/goal_button_bg.png")
+    caretBg: new ig.Image("media/windmaster/caret_button_bg.png")
+    pauseBlackout: new ig.Image("media/windmaster/pause_blackout.png")
 
     init: () ->
       # Initialize your game here; bind keys etc.

@@ -1,5 +1,5 @@
 ig.module(
-  "game.techs"
+  "game.windmaster.techs"
 ).requires(
   "impact.game"
 ).defines ->

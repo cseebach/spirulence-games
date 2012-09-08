@@ -1,17 +1,17 @@
 ig.module(
-  "game.entities.mine"
+  "game.windmaster.entities.mine"
 ).requires(
   'impact.game'
   'impact.animation'
-  'game.entities.placeable'
-  'game.techs'
+  'game.windmaster.entities.placeable'
+  'game.windmaster.techs'
 ).defines ->
   window.Mine = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
 
-    animSheet: new ig.AnimationSheet("media/mine.png", 16 ,16)
+    animSheet: new ig.AnimationSheet("media/windmaster/mine.png", 16 ,16)
 
     name: "Mine"
 

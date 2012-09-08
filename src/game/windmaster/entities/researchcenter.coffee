@@ -1,16 +1,16 @@
 ig.module(
-  'game.entities.researchcenter'
+  'game.windmaster.entities.researchcenter'
 ).requires(
   'impact.game'
   'impact.animation'
-  'game.entities.placeable'
+  'game.windmaster.entities.placeable'
 ).defines ->
   window.ResearchCenter = Placeable.extend(
     size: {x:16, y:16}
 
     collides: ig.Entity.COLLIDES.PASSIVE
 
-    animSheet: new ig.AnimationSheet("media/research_center.png", 16, 16)
+    animSheet: new ig.AnimationSheet("media/windmaster/research_center.png", 16, 16)
 
     energyConsumed: 10
 
