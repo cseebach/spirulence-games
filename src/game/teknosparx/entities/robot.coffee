@@ -15,4 +15,8 @@ ig.module(
       this.addAnim("moveNorth", 0.1, [2,3])
       this.addAnim("moveWest", 0.1, [4,5])
       this.addAnim("moveEast", 0.1, [6,7])
+      this.currentAnim = this.anims.moveSouth
+
+    update: () ->
+      this.parent()
   )

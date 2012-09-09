@@ -4,13 +4,17 @@ ig.module(
   "impact.game"
   "game.teknosparx.levels.world"
   "game.teknosparx.entities.robot"
+  "game.teknosparx.gui"
 ).defines(() ->
-
 
   Teknosparx = ig.Game.extend(
 
     #HUD graphics
     panelBg: new ig.Image("media/teknosparx/tekno_bg.png")
+
+    researchButtonImg: new ig.Image("media/teknosparx/research_button.png")
+
+    font: new ig.Font("media/04b03.font.png")
 
     init:()->
       ig.input.bind(ig.KEY.MOUSE1, "primary_button")
@@ -19,14 +23,22 @@ ig.module(
 
       ig.game.spawnEntity(Robot, 80, 160)
 
+      this.guiElements = [
+        new Panel(0, 215, this.panelBg),
+        new Button(40, 220, this.researchButtonImg, "Research:", this.font)
+      ]
+
     update:()->
-      this.parent()
+      this._mouseIntercepted = false
 
-      if ig.input.pressed("primary_button")
-        this.enterDragState()
+      element.update() for element in this.guiElements
 
-      if ig.input.released("primary_button")
-        this.exitDragState()
+      if not this._mouseIntercepted
+        if ig.input.pressed("primary_button")
+          this.enterDragState()
+
+        if ig.input.released("primary_button")
+          this.exitDragState()
 
       if this.dragState
         ig.game.screen.x = this.firstScreenX + (this.firstMouseDragX - ig.input.mouse.x)
@@ -34,6 +46,8 @@ ig.module(
 
         ig.game.screen.x = ig.game.screen.x.limit(0, (75-20)*16)
         ig.game.screen.y = ig.game.screen.y.limit(0, (50-15)*16)
+
+      this.parent()
 
     enterDragState: () ->
       this.firstMouseDragX = ig.input.mouse.x
@@ -45,10 +59,13 @@ ig.module(
     exitDragState: ()->
       this.dragState = false
 
+    mouseIntercepted: () ->
+      this._mouseIntercepted = true
+
     draw:()->
       this.parent()
 
-      this.panelBg.draw(0,220)
+      element.draw() for element in this.guiElements
   )
 
   ig.main( '#canvas', Teknosparx, 60, 320, 240, 2 )
