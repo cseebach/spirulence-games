@@ -1,12 +1,15 @@
 import bottle
+from gevent import monkey; monkey.patch_all()
 
 from spirulence_games import windmaster
+from spirulence_games import teknosparx
 
 __author__ = 'spirulence'
 
 app = bottle.Bottle()
 
 app.mount("/windmaster", windmaster.app)
+app.mount("/teknosparx", teknosparx.app)
 
 @app.route("/lib/<game_code:path>")
 def game_code(game_code):
