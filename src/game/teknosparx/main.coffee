@@ -3,14 +3,21 @@ ig.module(
 ).requires(
   "impact.game"
   "game.teknosparx.levels.world"
+  "game.teknosparx.entities.robot"
 ).defines(() ->
 
 
   Teknosparx = ig.Game.extend(
+
+    #HUD graphics
+    panelBg: new ig.Image("media/teknosparx/tekno_bg.png")
+
     init:()->
       ig.input.bind(ig.KEY.MOUSE1, "primary_button")
 
       ig.game.loadLevel(LevelWorld)
+
+      ig.game.spawnEntity(Robot, 80, 160)
 
     update:()->
       this.parent()
@@ -40,6 +47,8 @@ ig.module(
 
     draw:()->
       this.parent()
+
+      this.panelBg.draw(0,220)
   )
 
   ig.main( '#canvas', Teknosparx, 60, 320, 240, 2 )
