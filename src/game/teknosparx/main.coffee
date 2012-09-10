@@ -16,6 +16,8 @@ ig.module(
 
     font: new ig.Font("media/04b03.font.png")
 
+    bgTrack1: new ig.Sound("media/teknosparx/teknosparx.*", false)
+
     init:()->
       ig.input.bind(ig.KEY.MOUSE1, "primary_button")
 
@@ -27,6 +29,14 @@ ig.module(
         new Panel(0, 215, this.panelBg),
         new Button(40, 220, this.researchButtonImg, "Research:", this.font)
       ]
+
+      ig.music.add(this.bgTrack1)
+
+      ig.music.volume = 0.2
+      ig.music.play()
+
+      this.obstructions = ((0 for num2 in [1..50]) for num in [1..75])
+
 
     update:()->
       this._mouseIntercepted = false
